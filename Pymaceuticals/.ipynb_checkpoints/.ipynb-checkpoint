@@ -1,0 +1,1505 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Observations and Insights "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 58,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Mouse ID              1893\n",
+       "Drug Regimen          1893\n",
+       "Sex                   1893\n",
+       "Age_months            1893\n",
+       "Weight (g)            1893\n",
+       "Timepoint             1893\n",
+       "Tumor Volume (mm3)    1893\n",
+       "Metastatic Sites      1893\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 58,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Dependencies and Setup\n",
+    "import matplotlib.pyplot as plt\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import scipy.stats as st\n",
+    "\n",
+    "# Study data files\n",
+    "mouse_metadata_path = \"data/Mouse_metadata.csv\"\n",
+    "study_results_path = \"data/Study_results.csv\"\n",
+    "\n",
+    "\n",
+    "# Read the mouse data and the study results\n",
+    "mouse_metadata = pd.read_csv(mouse_metadata_path)\n",
+    "study_results = pd.read_csv(study_results_path)\n",
+    "study_results.head()\n",
+    "#mouse_metadata.head()\n",
+    "\n",
+    "\n",
+    "# Combine the data into a single dataset\n",
+    "pyma_complete = pd.merge(mouse_metadata, study_results, how=\"left\", on=[\"Mouse ID\", \"Mouse ID\"])\n",
+    " \n",
+    "# Display the data table for preview\n",
+    "pyma_complete.count()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "249"
+      ]
+     },
+     "execution_count": 59,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Checking the number of mice.\n",
+    "pyma_complete[\"Mouse ID\"].nunique()\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 60,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>g989</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      0\n",
+       "0  g989"
+      ]
+     },
+     "execution_count": 60,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Getting the duplicate mice by ID number that shows up for Mouse ID and Timepoint. \n",
+    "pd.DataFrame(pyma_complete.loc[pyma_complete.duplicated(subset=[\"Mouse ID\", \"Timepoint\"]), \"Mouse ID\"].unique())\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 61,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Mouse ID</th>\n",
+       "      <th>Drug Regimen</th>\n",
+       "      <th>Sex</th>\n",
+       "      <th>Age_months</th>\n",
+       "      <th>Weight (g)</th>\n",
+       "      <th>Timepoint</th>\n",
+       "      <th>Tumor Volume (mm3)</th>\n",
+       "      <th>Metastatic Sites</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>908</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>0</td>\n",
+       "      <td>45.000000</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>909</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>0</td>\n",
+       "      <td>45.000000</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>910</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>5</td>\n",
+       "      <td>48.786801</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>911</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>5</td>\n",
+       "      <td>47.570392</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>912</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>10</td>\n",
+       "      <td>51.745156</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>913</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>10</td>\n",
+       "      <td>49.880528</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>914</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>15</td>\n",
+       "      <td>51.325852</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>915</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>15</td>\n",
+       "      <td>53.442020</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>916</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>20</td>\n",
+       "      <td>55.326122</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>917</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>20</td>\n",
+       "      <td>54.657650</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>918</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>25</td>\n",
+       "      <td>56.045564</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>919</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>30</td>\n",
+       "      <td>59.082294</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>920</th>\n",
+       "      <td>g989</td>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>21</td>\n",
+       "      <td>26</td>\n",
+       "      <td>35</td>\n",
+       "      <td>62.570880</td>\n",
+       "      <td>2</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "    Mouse ID Drug Regimen     Sex  Age_months  Weight (g)  Timepoint  \\\n",
+       "908     g989     Propriva  Female          21          26          0   \n",
+       "909     g989     Propriva  Female          21          26          0   \n",
+       "910     g989     Propriva  Female          21          26          5   \n",
+       "911     g989     Propriva  Female          21          26          5   \n",
+       "912     g989     Propriva  Female          21          26         10   \n",
+       "913     g989     Propriva  Female          21          26         10   \n",
+       "914     g989     Propriva  Female          21          26         15   \n",
+       "915     g989     Propriva  Female          21          26         15   \n",
+       "916     g989     Propriva  Female          21          26         20   \n",
+       "917     g989     Propriva  Female          21          26         20   \n",
+       "918     g989     Propriva  Female          21          26         25   \n",
+       "919     g989     Propriva  Female          21          26         30   \n",
+       "920     g989     Propriva  Female          21          26         35   \n",
+       "\n",
+       "     Tumor Volume (mm3)  Metastatic Sites  \n",
+       "908           45.000000                 0  \n",
+       "909           45.000000                 0  \n",
+       "910           48.786801                 0  \n",
+       "911           47.570392                 0  \n",
+       "912           51.745156                 0  \n",
+       "913           49.880528                 0  \n",
+       "914           51.325852                 1  \n",
+       "915           53.442020                 0  \n",
+       "916           55.326122                 1  \n",
+       "917           54.657650                 1  \n",
+       "918           56.045564                 1  \n",
+       "919           59.082294                 1  \n",
+       "920           62.570880                 2  "
+      ]
+     },
+     "execution_count": 61,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Optional: Get all the data for the duplicate mouse ID. \n",
+    "(pyma_complete.loc[pyma_complete[\"Mouse ID\"]==\"g989\"])\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 62,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Mouse ID</th>\n",
+       "      <th>Drug Regimen</th>\n",
+       "      <th>Sex</th>\n",
+       "      <th>Age_months</th>\n",
+       "      <th>Weight (g)</th>\n",
+       "      <th>Timepoint</th>\n",
+       "      <th>Tumor Volume (mm3)</th>\n",
+       "      <th>Metastatic Sites</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>k403</td>\n",
+       "      <td>Ramicane</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>21</td>\n",
+       "      <td>16</td>\n",
+       "      <td>0</td>\n",
+       "      <td>45.000000</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>k403</td>\n",
+       "      <td>Ramicane</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>21</td>\n",
+       "      <td>16</td>\n",
+       "      <td>5</td>\n",
+       "      <td>38.825898</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>k403</td>\n",
+       "      <td>Ramicane</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>21</td>\n",
+       "      <td>16</td>\n",
+       "      <td>10</td>\n",
+       "      <td>35.014271</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>k403</td>\n",
+       "      <td>Ramicane</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>21</td>\n",
+       "      <td>16</td>\n",
+       "      <td>15</td>\n",
+       "      <td>34.223992</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>k403</td>\n",
+       "      <td>Ramicane</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>21</td>\n",
+       "      <td>16</td>\n",
+       "      <td>20</td>\n",
+       "      <td>32.997729</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1888</th>\n",
+       "      <td>z969</td>\n",
+       "      <td>Naftisol</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>9</td>\n",
+       "      <td>30</td>\n",
+       "      <td>25</td>\n",
+       "      <td>63.145652</td>\n",
+       "      <td>2</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1889</th>\n",
+       "      <td>z969</td>\n",
+       "      <td>Naftisol</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>9</td>\n",
+       "      <td>30</td>\n",
+       "      <td>30</td>\n",
+       "      <td>65.841013</td>\n",
+       "      <td>3</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1890</th>\n",
+       "      <td>z969</td>\n",
+       "      <td>Naftisol</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>9</td>\n",
+       "      <td>30</td>\n",
+       "      <td>35</td>\n",
+       "      <td>69.176246</td>\n",
+       "      <td>4</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1891</th>\n",
+       "      <td>z969</td>\n",
+       "      <td>Naftisol</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>9</td>\n",
+       "      <td>30</td>\n",
+       "      <td>40</td>\n",
+       "      <td>70.314904</td>\n",
+       "      <td>4</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1892</th>\n",
+       "      <td>z969</td>\n",
+       "      <td>Naftisol</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>9</td>\n",
+       "      <td>30</td>\n",
+       "      <td>45</td>\n",
+       "      <td>73.867845</td>\n",
+       "      <td>4</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>1880 rows × 8 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "     Mouse ID Drug Regimen   Sex  Age_months  Weight (g)  Timepoint  \\\n",
+       "0        k403     Ramicane  Male          21          16          0   \n",
+       "1        k403     Ramicane  Male          21          16          5   \n",
+       "2        k403     Ramicane  Male          21          16         10   \n",
+       "3        k403     Ramicane  Male          21          16         15   \n",
+       "4        k403     Ramicane  Male          21          16         20   \n",
+       "...       ...          ...   ...         ...         ...        ...   \n",
+       "1888     z969     Naftisol  Male           9          30         25   \n",
+       "1889     z969     Naftisol  Male           9          30         30   \n",
+       "1890     z969     Naftisol  Male           9          30         35   \n",
+       "1891     z969     Naftisol  Male           9          30         40   \n",
+       "1892     z969     Naftisol  Male           9          30         45   \n",
+       "\n",
+       "      Tumor Volume (mm3)  Metastatic Sites  \n",
+       "0              45.000000                 0  \n",
+       "1              38.825898                 0  \n",
+       "2              35.014271                 1  \n",
+       "3              34.223992                 1  \n",
+       "4              32.997729                 1  \n",
+       "...                  ...               ...  \n",
+       "1888           63.145652                 2  \n",
+       "1889           65.841013                 3  \n",
+       "1890           69.176246                 4  \n",
+       "1891           70.314904                 4  \n",
+       "1892           73.867845                 4  \n",
+       "\n",
+       "[1880 rows x 8 columns]"
+      ]
+     },
+     "execution_count": 62,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Create a clean DataFrame by dropping the duplicate mouse by its ID.\n",
+    "df = pyma_complete.loc[pyma_complete[\"Mouse ID\"]!=\"g989\"]\n",
+    "df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 63,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Checking the number of mice in the clean DataFrame.\n",
+    "clean_df = df[\"Mouse ID\"].nunique()\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Summary Statistics"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 64,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mice_mean = df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].mean()\n",
+    "mice_median = df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].median()\n",
+    "mice_var = df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].var()\n",
+    "mice_dev = df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].std()\n",
+    "sem = df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].sem()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 65,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Mean</th>\n",
+       "      <th>Median</th>\n",
+       "      <th>Variance</th>\n",
+       "      <th>Standard Deviation</th>\n",
+       "      <th>SEM</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Drug Regimen</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>Capomulin</th>\n",
+       "      <td>40.675741</td>\n",
+       "      <td>41.557809</td>\n",
+       "      <td>24.947764</td>\n",
+       "      <td>4.994774</td>\n",
+       "      <td>0.329346</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Ceftamin</th>\n",
+       "      <td>52.591172</td>\n",
+       "      <td>51.776157</td>\n",
+       "      <td>39.290177</td>\n",
+       "      <td>6.268188</td>\n",
+       "      <td>0.469821</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Infubinol</th>\n",
+       "      <td>52.884795</td>\n",
+       "      <td>51.820584</td>\n",
+       "      <td>43.128684</td>\n",
+       "      <td>6.567243</td>\n",
+       "      <td>0.492236</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Ketapril</th>\n",
+       "      <td>55.235638</td>\n",
+       "      <td>53.698743</td>\n",
+       "      <td>68.553577</td>\n",
+       "      <td>8.279709</td>\n",
+       "      <td>0.603860</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Naftisol</th>\n",
+       "      <td>54.331565</td>\n",
+       "      <td>52.509285</td>\n",
+       "      <td>66.173479</td>\n",
+       "      <td>8.134708</td>\n",
+       "      <td>0.596466</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Placebo</th>\n",
+       "      <td>54.033581</td>\n",
+       "      <td>52.288934</td>\n",
+       "      <td>61.168083</td>\n",
+       "      <td>7.821003</td>\n",
+       "      <td>0.581331</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Propriva</th>\n",
+       "      <td>52.320930</td>\n",
+       "      <td>50.446266</td>\n",
+       "      <td>43.852013</td>\n",
+       "      <td>6.622085</td>\n",
+       "      <td>0.544332</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Ramicane</th>\n",
+       "      <td>40.216745</td>\n",
+       "      <td>40.673236</td>\n",
+       "      <td>23.486704</td>\n",
+       "      <td>4.846308</td>\n",
+       "      <td>0.320955</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Stelasyn</th>\n",
+       "      <td>54.233149</td>\n",
+       "      <td>52.431737</td>\n",
+       "      <td>59.450562</td>\n",
+       "      <td>7.710419</td>\n",
+       "      <td>0.573111</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Zoniferol</th>\n",
+       "      <td>53.236507</td>\n",
+       "      <td>51.818479</td>\n",
+       "      <td>48.533355</td>\n",
+       "      <td>6.966589</td>\n",
+       "      <td>0.516398</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                   Mean     Median   Variance  Standard Deviation       SEM\n",
+       "Drug Regimen                                                               \n",
+       "Capomulin     40.675741  41.557809  24.947764            4.994774  0.329346\n",
+       "Ceftamin      52.591172  51.776157  39.290177            6.268188  0.469821\n",
+       "Infubinol     52.884795  51.820584  43.128684            6.567243  0.492236\n",
+       "Ketapril      55.235638  53.698743  68.553577            8.279709  0.603860\n",
+       "Naftisol      54.331565  52.509285  66.173479            8.134708  0.596466\n",
+       "Placebo       54.033581  52.288934  61.168083            7.821003  0.581331\n",
+       "Propriva      52.320930  50.446266  43.852013            6.622085  0.544332\n",
+       "Ramicane      40.216745  40.673236  23.486704            4.846308  0.320955\n",
+       "Stelasyn      54.233149  52.431737  59.450562            7.710419  0.573111\n",
+       "Zoniferol     53.236507  51.818479  48.533355            6.966589  0.516398"
+      ]
+     },
+     "execution_count": 65,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Generate a summary statistics table of mean, median, variance, standard deviation, and SEM of the tumor volume for each regimen\n",
+    "mice_mean = df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].mean()\n",
+    "mice_median = df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].median()\n",
+    "mice_var = df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].var()\n",
+    "mice_dev = df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].std()\n",
+    "sem = df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].sem()\n",
+    "\n",
+    "Stat_sum = pd.DataFrame({\n",
+    "     'Mean': mice_mean,\n",
+    "     'Median': mice_median,\n",
+    "     'Variance': mice_var,\n",
+    "     'Standard Deviation': mice_dev,\n",
+    "     'SEM': sem\n",
+    "})\n",
+    "\n",
+    "# Use groupby and summary statistical methods to calculate the following properties of each drug regimen: \n",
+    "# mean, median, variance, standard deviation, and SEM of the tumor volume. \n",
+    "# Assemble the resulting series into a single summary dataframe.\n",
+    "\n",
+    "\n",
+    "Stat_sum\n",
+    "\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 66,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Mean</th>\n",
+       "      <th>Median</th>\n",
+       "      <th>Var</th>\n",
+       "      <th>STD</th>\n",
+       "      <th>SEM</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Drug Regimen</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>Capomulin</th>\n",
+       "      <td>40.675741</td>\n",
+       "      <td>41.557809</td>\n",
+       "      <td>24.947764</td>\n",
+       "      <td>4.994774</td>\n",
+       "      <td>0.329346</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Ceftamin</th>\n",
+       "      <td>52.591172</td>\n",
+       "      <td>51.776157</td>\n",
+       "      <td>39.290177</td>\n",
+       "      <td>6.268188</td>\n",
+       "      <td>0.469821</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Infubinol</th>\n",
+       "      <td>52.884795</td>\n",
+       "      <td>51.820584</td>\n",
+       "      <td>43.128684</td>\n",
+       "      <td>6.567243</td>\n",
+       "      <td>0.492236</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Ketapril</th>\n",
+       "      <td>55.235638</td>\n",
+       "      <td>53.698743</td>\n",
+       "      <td>68.553577</td>\n",
+       "      <td>8.279709</td>\n",
+       "      <td>0.603860</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Naftisol</th>\n",
+       "      <td>54.331565</td>\n",
+       "      <td>52.509285</td>\n",
+       "      <td>66.173479</td>\n",
+       "      <td>8.134708</td>\n",
+       "      <td>0.596466</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Placebo</th>\n",
+       "      <td>54.033581</td>\n",
+       "      <td>52.288934</td>\n",
+       "      <td>61.168083</td>\n",
+       "      <td>7.821003</td>\n",
+       "      <td>0.581331</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Propriva</th>\n",
+       "      <td>52.320930</td>\n",
+       "      <td>50.446266</td>\n",
+       "      <td>43.852013</td>\n",
+       "      <td>6.622085</td>\n",
+       "      <td>0.544332</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Ramicane</th>\n",
+       "      <td>40.216745</td>\n",
+       "      <td>40.673236</td>\n",
+       "      <td>23.486704</td>\n",
+       "      <td>4.846308</td>\n",
+       "      <td>0.320955</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Stelasyn</th>\n",
+       "      <td>54.233149</td>\n",
+       "      <td>52.431737</td>\n",
+       "      <td>59.450562</td>\n",
+       "      <td>7.710419</td>\n",
+       "      <td>0.573111</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Zoniferol</th>\n",
+       "      <td>53.236507</td>\n",
+       "      <td>51.818479</td>\n",
+       "      <td>48.533355</td>\n",
+       "      <td>6.966589</td>\n",
+       "      <td>0.516398</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                   Mean     Median        Var       STD       SEM\n",
+       "Drug Regimen                                                     \n",
+       "Capomulin     40.675741  41.557809  24.947764  4.994774  0.329346\n",
+       "Ceftamin      52.591172  51.776157  39.290177  6.268188  0.469821\n",
+       "Infubinol     52.884795  51.820584  43.128684  6.567243  0.492236\n",
+       "Ketapril      55.235638  53.698743  68.553577  8.279709  0.603860\n",
+       "Naftisol      54.331565  52.509285  66.173479  8.134708  0.596466\n",
+       "Placebo       54.033581  52.288934  61.168083  7.821003  0.581331\n",
+       "Propriva      52.320930  50.446266  43.852013  6.622085  0.544332\n",
+       "Ramicane      40.216745  40.673236  23.486704  4.846308  0.320955\n",
+       "Stelasyn      54.233149  52.431737  59.450562  7.710419  0.573111\n",
+       "Zoniferol     53.236507  51.818479  48.533355  6.966589  0.516398"
+      ]
+     },
+     "execution_count": 66,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Generate a summary statistics table of mean, median, variance, standard deviation, and SEM of the tumor volume for each regimen\n",
+    "# Using the aggregation method, produce the same summary statistics in a single line\n",
+    "df.groupby(\"Drug Regimen\")[\"Tumor Volume (mm3)\"].agg(Mean='mean', Median='median', Var='var', STD='std', SEM= 'sem')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Bar and Pie Charts"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 67,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<matplotlib.axes._subplots.AxesSubplot at 0x7fab34e28e10>"
+      ]
+     },
+     "execution_count": 67,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# Generate a bar plot showing the total number of timepoints for all mice tested for each drug regimen using Pandas.\n",
+    "total_tp = (pd.DataFrame(df.groupby(['Drug Regimen'])['Timepoint'].count())).reset_index()\n",
+    "total_tp.plot.bar(\"Drug Regimen\", \"Timepoint\")\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 68,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Drug Regimen</th>\n",
+       "      <th>Timepoint</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Capomulin</td>\n",
+       "      <td>230</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Ceftamin</td>\n",
+       "      <td>178</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>Infubinol</td>\n",
+       "      <td>178</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Ketapril</td>\n",
+       "      <td>188</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Naftisol</td>\n",
+       "      <td>186</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>Placebo</td>\n",
+       "      <td>181</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>Propriva</td>\n",
+       "      <td>148</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>Ramicane</td>\n",
+       "      <td>228</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8</th>\n",
+       "      <td>Stelasyn</td>\n",
+       "      <td>181</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9</th>\n",
+       "      <td>Zoniferol</td>\n",
+       "      <td>182</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  Drug Regimen  Timepoint\n",
+       "0    Capomulin        230\n",
+       "1     Ceftamin        178\n",
+       "2    Infubinol        178\n",
+       "3     Ketapril        188\n",
+       "4     Naftisol        186\n",
+       "5      Placebo        181\n",
+       "6     Propriva        148\n",
+       "7     Ramicane        228\n",
+       "8     Stelasyn        181\n",
+       "9    Zoniferol        182"
+      ]
+     },
+     "execution_count": 68,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "total_tp"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 69,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<BarContainer object of 10 artists>"
+      ]
+     },
+     "execution_count": 69,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# Generate a bar plot showing the total number of timepoints for all mice tested for each drug regimen using pyplot.\n",
+    "total_tp = (pd.DataFrame(df.groupby(['Drug Regimen'])['Timepoint'].count())).reset_index()\n",
+    "total_tp\n",
+    "#df[\"Drug Regimen\"].value_counts(), total_tp\n",
+    "x_axis = np.arange(len(total_tp))\n",
+    "y_axis = total_tp[\"Timepoint\"]\n",
+    "plt.bar(x_axis, y_axis)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 71,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "([<matplotlib.patches.Wedge at 0x7fab39535ef0>,\n",
+       "  <matplotlib.patches.Wedge at 0x7fab395424e0>],\n",
+       " [Text(-0.03308201408261547, 1.0995024239828841, '958'),\n",
+       "  Text(0.033082014082615095, -1.0995024239828841, '922')])"
+      ]
+     },
+     "execution_count": 71,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# Generate a pie plot showing the distribution of female versus male mice using Pandas\n",
+    "sex_count = df[\"Sex\"].value_counts()\n",
+    "plt.pie(sex_count, labels = sex_count)\n",
+    "\n",
+    "\n",
+    "\n",
+    " \n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Generate a pie plot showing the distribution of female versus male mice using pyplot\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Quartiles, Outliers and Boxplots"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Calculate the final tumor volume of each mouse across four of the treatment regimens:  \n",
+    "# Capomulin, Ramicane, Infubinol, and Ceftamin\n",
+    "\n",
+    "# Start by getting the last (greatest) timepoint for each mouse\n",
+    "\n",
+    "\n",
+    "# Merge this group df with the original dataframe to get the tumor volume at the last timepoint\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Put treatments into a list for for loop (and later for plot labels)\n",
+    "\n",
+    "\n",
+    "# Create empty list to fill with tumor vol data (for plotting)\n",
+    "\n",
+    "\n",
+    "# Calculate the IQR and quantitatively determine if there are any potential outliers. \n",
+    "\n",
+    "    \n",
+    "    # Locate the rows which contain mice on each drug and get the tumor volumes\n",
+    "    \n",
+    "    \n",
+    "    # add subset \n",
+    "    \n",
+    "    \n",
+    "    # Determine outliers using upper and lower bounds\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Generate a box plot of the final tumor volume of each mouse across four regimens of interest\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Line and Scatter Plots"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Generate a line plot of tumor volume vs. time point for a mouse treated with Capomulin\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Generate a scatter plot of average tumor volume vs. mouse weight for the Capomulin regimen\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Correlation and Regression"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Calculate the correlation coefficient and linear regression model \n",
+    "# for mouse weight and average tumor volume for the Capomulin regimen\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "anaconda-cloud": {},
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
